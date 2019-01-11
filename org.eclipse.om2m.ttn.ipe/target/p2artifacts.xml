@@ -1,10 +1,10 @@
 <?xml version='1.0' encoding='UTF-8'?>
 <?artifactRepository version='1.1.0'?>
 <artifacts size='1'>
-  <artifact classifier='osgi.bundle' id='org.eclipse.om2m.ttn.ipe' version='1.0.0.20190111-1301'>
+  <artifact classifier='osgi.bundle' id='org.eclipse.om2m.ttn.ipe' version='1.0.0.20190111-1515'>
     <properties size='5'>
-      <property name='artifact.size' value='189901'/>
-      <property name='download.size' value='189901'/>
+      <property name='artifact.size' value='191301'/>
+      <property name='download.size' value='191301'/>
       <property name='maven-groupId' value='org.eclipse.om2m'/>
       <property name='maven-artifactId' value='org.eclipse.om2m.ttn.ipe'/>
       <property name='maven-version' value='1.0.0.qualifier'/>

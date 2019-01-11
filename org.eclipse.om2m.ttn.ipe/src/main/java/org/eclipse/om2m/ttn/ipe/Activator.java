@@ -2,6 +2,8 @@ package org.eclipse.om2m.ttn.ipe;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.osgi.framework.BundleActivator;
+import org.osgi.framework.BundleContext;
 
 public class Activator implements BundleActivator {
 	
@@ -13,6 +15,8 @@ public class Activator implements BundleActivator {
 	static BundleContext getContext() {
 
 		logger.info("Creating TTN Ipe !!!!!!!!!!!");
+
+		System.out.println("Coucou");
 		
 		return context;
 	}
@@ -23,7 +27,7 @@ public class Activator implements BundleActivator {
 	 */
 	public void start(BundleContext bundleContext) throws Exception {
 		Activator.context = bundleContext;
-
+		System.out.println("Ciyciy");
 		logger.info("Starting TTN Ipe !!!!!!!!!!!");
 		
 	}
