@@ -1,0 +1,15 @@
+Manifest-Version: 1.0
+Automatic-Module-Name: org.eclipse.om2m.ttn.ipe
+Bundle-SymbolicName: org.eclipse.om2m.ttn.ipe
+Bundle-Name: Ipe
+Bundle-Version: 1.0.0.20190111-1301
+Bundle-ClassPath: libs/org.eclipse.paho.client.mqttv3-1.1.0.jar,.
+Require-Bundle: org.eclipse.om2m.commons;bundle-version="1.1.0"
+Bundle-ManifestVersion: 2
+Bundle-Activator: org.eclipse.om2m.ttn.ipe.Activator
+Bundle-RequiredExecutionEnvironment: JavaSE-1.7
+Bundle-ActivationPolicy: lazy
+Import-Package: org.apache.commons.logging,org.eclipse.om2m.core.servi
+ ce,org.eclipse.om2m.interworking.service,org.osgi.framework,org.osgi.
+ util.tracker
+
