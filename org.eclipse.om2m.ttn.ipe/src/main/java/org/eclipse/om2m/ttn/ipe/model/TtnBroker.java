@@ -6,6 +6,7 @@ public class TtnBroker {
 	private int port = 1883;
 	private String uplinkTopic = "+/devices/+/up";
 	private String downlinkTopic = "+/devices/down";
+	private String eventsTopic = "+/devices/+/events/+";
 
 	public String getHost() {
 		return host;
@@ -31,6 +32,14 @@ public class TtnBroker {
 		this.uplinkTopic = uplinkTopic;
 	}
 
+	public void setEventsTopic(String eventsTopic) {
+		this.eventsTopic = eventsTopic;
+	}
+
+	public String getEventsTopic() {
+		return eventsTopic;
+	}
+
 	public String getDownlinkTopic() {
 		return downlinkTopic;
 	}
@@ -38,7 +47,7 @@ public class TtnBroker {
 	public void setDownlinkTopic(String downlinkTopic) {
 		this.downlinkTopic = downlinkTopic;
 	}
-	
+
 	public String getServerURI() {
 		return "tcp://" + this.host + ":" + this.port;
 	}

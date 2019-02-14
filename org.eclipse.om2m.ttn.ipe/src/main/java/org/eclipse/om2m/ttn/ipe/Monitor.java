@@ -50,6 +50,8 @@ public class Monitor {
 					this.broker.setUplinkTopic((String) broker.get("uplink"));
 				if (broker.containsKey("downlink"))
 					this.broker.setDownlinkTopic((String) broker.get("downlink"));
+				if (broker.containsKey("events"))
+					this.broker.setDownlinkTopic((String) broker.get("events"));
 			}
 
 			if (configObject.containsKey("applications")) {

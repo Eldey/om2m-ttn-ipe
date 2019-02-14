@@ -67,6 +67,12 @@ public class TtnMqttClient implements MqttCallback {
 			ae.setRequestReachability(false);
 			ae.setAppID("TTN_" + application.getName());
 			requestSender.createAE(ae);
+
+			Container errorContainer = new Container();
+			errorContainer.setName("errors");
+			errorContainer.setMaxNrOfInstances(BigInteger.valueOf(this.application.getMaxMessages()));
+			String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
+			requestSender.createContainer(aePrefix, errorContainer);
 		}
 
 		try {
@@ -78,17 +84,33 @@ public class TtnMqttClient implements MqttCallback {
 
 			client.setCallback(this);
 
-			// Subscribe to uplink topic
-			client.subscribe(this.broker.getUplinkTopic());
+			// Subscribe to topics
+			String[] topics = { this.broker.getUplinkTopic(), this.broker.getDownlinkTopic(),
+					this.broker.getEventsTopic() };
+			client.subscribe(topics);
 
 		} catch (MqttException e) {
+
+			ContentInstance contentInstance = new ContentInstance();
+			contentInstance.setContent(e.toString());
+
+			String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
+			String errorsPrefix = aePrefix + "/errors";
+			requestSender.createContentInstance(errorsPrefix, contentInstance);
 			throw new RuntimeException("Error on MQTT execution.", e);
 		}
 	}
 
 	@Override
 	public void connectionLost(Throwable exception) {
+		System.out.println("Connection lost");
 		LOGGER.error("Connection lost.", exception);
+		ContentInstance contentInstance = new ContentInstance();
+		contentInstance.setContent("Connection lost due to :" + exception.toString());
+
+		String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
+		String errorsPrefix = aePrefix + "/errors";
+		requestSender.createContentInstance(errorsPrefix, contentInstance);
 	}
 
 	@Override
@@ -98,40 +120,75 @@ public class TtnMqttClient implements MqttCallback {
 
 	private void checkAndCreateContainers(String deviceId) {
 		String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
-		ResponsePrimitive response = requestSender
-				.getRequest(aePrefix + "/" + deviceId);
-		if(!response.getResponseStatusCode().equals(ResponseStatusCode.OK)) {
+		ResponsePrimitive response = requestSender.getRequest(aePrefix + "/" + deviceId);
+		if (!response.getResponseStatusCode().equals(ResponseStatusCode.OK)) {
 			Container deviceContainer = new Container();
 			deviceContainer.setName(deviceId);
 			requestSender.createContainer(aePrefix, deviceContainer);
-			
+
 			Container uplinkContainer = new Container();
 			uplinkContainer.setName("uplink");
 			uplinkContainer.setMaxNrOfInstances(BigInteger.valueOf(this.application.getMaxMessages()));
 			requestSender.createContainer(aePrefix + "/" + deviceId, uplinkContainer);
-			
+
 			Container downlinkContainer = new Container();
 			downlinkContainer.setName("downlink");
 			downlinkContainer.setMaxNrOfInstances(BigInteger.valueOf(this.application.getMaxMessages()));
 			requestSender.createContainer(aePrefix + "/" + deviceId, downlinkContainer);
-			
+
+			Container eventsContainer = new Container();
+			eventsContainer.setName("events");
+			eventsContainer.setMaxNrOfInstances(BigInteger.valueOf(this.application.getMaxMessages()));
+			requestSender.createContainer(aePrefix + "/" + deviceId, eventsContainer);
+
 			// TODO Create subscription to downlink container
 		}
 	}
 
 	@Override
 	public void messageArrived(String topic, MqttMessage message) throws Exception {
-		String payload = new String(message.getPayload());
+		String[] splittedTopic = topic.split("/");
+
+		String payload = null;
+		String prefix = null;
+
+		if (message.toString().equals("null")) {
+			payload = "{}";
+		} else {
+			payload = new String(message.getPayload());
+		}
+
 		JSONObject jsonPayload = (JSONObject) parser.parse(payload);
-		String deviceId = (String) jsonPayload.get("dev_id");
+		jsonPayload.put("topic", topic);
+		String deviceId = splittedTopic[2];
+
 		checkAndCreateContainers(deviceId);
-		
+
 		ContentInstance contentInstance = new ContentInstance();
-		contentInstance.setContent(payload);
-		
+		contentInstance.setContent(jsonPayload.toJSONString());
+
 		String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
-		String uplinkPrefix = aePrefix + "/" + deviceId + "/uplink";
-		requestSender.createContentInstance(uplinkPrefix, contentInstance);
+
+		switch (splittedTopic[3]) {
+		case "up":
+			prefix = aePrefix + "/" + deviceId + "/uplink";
+			break;
+		case "events":
+			contentInstance.getLabels().add(splittedTopic[4]);
+			prefix = aePrefix + "/" + deviceId + "/events";
+			break;
+
+		case "downlink":
+
+			prefix = aePrefix + "/" + deviceId + "/events";
+			break;
+
+		default:
+			break;
+		}
+
+		requestSender.createContentInstance(prefix, contentInstance);
+
 	}
 
 }
