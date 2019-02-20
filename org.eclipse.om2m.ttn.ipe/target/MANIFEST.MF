@@ -1,9 +1,10 @@
 Manifest-Version: 1.0
 Automatic-Module-Name: org.eclipse.om2m.ttn.ipe
-Bundle-SymbolicName: org.eclipse.om2m.ttn.ipe
+Bundle-SymbolicName: org.eclipse.om2m.ipe.ttn
 Bundle-Name: Ipe
-Bundle-Version: 1.0.0.20190111-1515
-Bundle-ClassPath: libs/org.eclipse.paho.client.mqttv3-1.1.0.jar,.
+Bundle-Version: 1.1.0.20190220-0505
+Bundle-ClassPath: libs/org.eclipse.paho.client.mqttv3-1.1.0.jar,libs/j
+ son-simple-1.1.1.jar,.
 Require-Bundle: org.eclipse.om2m.commons;bundle-version="1.1.0"
 Bundle-ManifestVersion: 2
 Bundle-Activator: org.eclipse.om2m.ttn.ipe.Activator

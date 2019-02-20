@@ -5,11 +5,13 @@ import java.math.BigInteger;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.om2m.commons.constants.Constants;
+import org.eclipse.om2m.commons.constants.NotificationContentType;
 import org.eclipse.om2m.commons.constants.ResponseStatusCode;
 import org.eclipse.om2m.commons.resource.AE;
 import org.eclipse.om2m.commons.resource.Container;
 import org.eclipse.om2m.commons.resource.ContentInstance;
 import org.eclipse.om2m.commons.resource.ResponsePrimitive;
+import org.eclipse.om2m.commons.resource.Subscription;
 import org.eclipse.om2m.ttn.ipe.model.TtnApplication;
 import org.eclipse.om2m.ttn.ipe.model.TtnBroker;
 import org.eclipse.om2m.ttn.ipe.util.RequestSender;
@@ -117,6 +119,14 @@ public class TtnMqttClient implements MqttCallback {
 	public void deliveryComplete(IMqttDeliveryToken token) {
 		// Empty
 	}
+	
+	public void closeConnection() {
+		try {
+			this.client.close();
+		} catch (MqttException e) {
+			
+		}
+	}
 
 	private void checkAndCreateContainers(String deviceId) {
 		String aePrefix = this.csePrefix + "/" + "TTN_" + application.getName();
@@ -141,7 +151,10 @@ public class TtnMqttClient implements MqttCallback {
 			eventsContainer.setMaxNrOfInstances(BigInteger.valueOf(this.application.getMaxMessages()));
 			requestSender.createContainer(aePrefix + "/" + deviceId, eventsContainer);
 
-			// TODO Create subscription to downlink container
+			Subscription subscription = new Subscription();
+			subscription.setNotificationContentType(NotificationContentType.WHOLE_RESOURCE);
+			subscription.getNotificationURI().add("IPETTN");
+			ResponsePrimitive r = requestSender.createSUB(aePrefix + "/" + deviceId+"/"+"downlink", subscription);
 		}
 	}
 

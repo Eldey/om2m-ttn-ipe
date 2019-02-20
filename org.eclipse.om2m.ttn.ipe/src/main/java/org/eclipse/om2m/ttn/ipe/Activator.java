@@ -3,6 +3,8 @@ package org.eclipse.om2m.ttn.ipe;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.eclipse.om2m.core.service.CseService;
+import org.eclipse.om2m.interworking.service.InterworkingService;
+import org.eclipse.om2m.ttn.ipe.util.Controller;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
 import org.osgi.framework.ServiceReference;
@@ -46,9 +48,13 @@ public class Activator implements BundleActivator {
 		try {
 			Activator.context = bundleContext;
 			LOGGER.info("Starting TTN IPE");
+
+			bundleContext.registerService(InterworkingService.class.getName(), new Controller(), null);
+			
 			monitor = new Monitor();
 			cseServiceTracker = new ServiceTracker<>(bundleContext, CseService.class, cseServiceTrackerCustomizer);
 			cseServiceTracker.open();
+			
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}

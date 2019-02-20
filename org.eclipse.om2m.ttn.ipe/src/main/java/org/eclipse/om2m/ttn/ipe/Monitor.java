@@ -90,7 +90,10 @@ public class Monitor {
 	}
 
 	public void stop() {
-		// TODO Stop the mqtt clients
+		for (Entry<String, TtnMqttClient> entries : clientMap.entrySet()) {
+			entries.getValue().closeConnection();
+			;
+		}
 	}
 
 }
