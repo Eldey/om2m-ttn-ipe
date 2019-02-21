@@ -14,6 +14,7 @@ import org.eclipse.om2m.commons.resource.ResponsePrimitive;
 import org.eclipse.om2m.commons.resource.Subscription;
 import org.eclipse.om2m.ttn.ipe.model.TtnApplication;
 import org.eclipse.om2m.ttn.ipe.model.TtnBroker;
+import org.eclipse.om2m.ttn.ipe.util.Controller;
 import org.eclipse.om2m.ttn.ipe.util.RequestSender;
 import org.eclipse.paho.client.mqttv3.IMqttDeliveryToken;
 import org.eclipse.paho.client.mqttv3.MqttCallback;
@@ -66,8 +67,9 @@ public class TtnMqttClient implements MqttCallback {
 			// Create the AE if it is not present
 			AE ae = new AE();
 			ae.setName("TTN_" + application.getName());
-			ae.setRequestReachability(false);
+			ae.setRequestReachability(true);
 			ae.setAppID("TTN_" + application.getName());
+			ae.getPointOfAccess().add(Controller.APOCPath);
 			requestSender.createAE(ae);
 
 			Container errorContainer = new Container();
@@ -153,7 +155,7 @@ public class TtnMqttClient implements MqttCallback {
 
 			Subscription subscription = new Subscription();
 			subscription.setNotificationContentType(NotificationContentType.WHOLE_RESOURCE);
-			subscription.getNotificationURI().add("IPETTN");
+			subscription.getNotificationURI().add(aePrefix);
 			ResponsePrimitive r = requestSender.createSUB(aePrefix + "/" + deviceId+"/"+"downlink", subscription);
 		}
 	}
