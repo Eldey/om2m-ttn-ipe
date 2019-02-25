@@ -2,11 +2,16 @@ package org.eclipse.om2m.ttn.ipe;
 
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.eclipse.om2m.commons.constants.MimeMediaType;
 import org.eclipse.om2m.core.service.CseService;
+import org.eclipse.om2m.datamapping.service.DataMapperService;
 import org.eclipse.om2m.interworking.service.InterworkingService;
 import org.eclipse.om2m.ttn.ipe.util.Controller;
 import org.osgi.framework.BundleActivator;
 import org.osgi.framework.BundleContext;
+import org.osgi.framework.Constants;
+import org.osgi.framework.Filter;
+import org.osgi.framework.FrameworkUtil;
 import org.osgi.framework.ServiceReference;
 import org.osgi.util.tracker.ServiceTracker;
 import org.osgi.util.tracker.ServiceTrackerCustomizer;
@@ -21,6 +26,7 @@ public class Activator implements BundleActivator {
 	}
 
 	private Monitor monitor;
+	private Controller controller;
 
 	private ServiceTracker<CseService, CseService> cseServiceTracker;
 	private ServiceTrackerCustomizer<CseService, CseService> cseServiceTrackerCustomizer = new ServiceTrackerCustomizer<CseService, CseService>() {
@@ -44,17 +50,45 @@ public class Activator implements BundleActivator {
 		}
 	};
 
+	private ServiceTracker<DataMapperService, DataMapperService> dataMapperServiceTracker;
+	private ServiceTrackerCustomizer<DataMapperService, DataMapperService> dataMapperServiceCustomizer = new ServiceTrackerCustomizer<DataMapperService, DataMapperService>() {
+
+		public DataMapperService addingService(ServiceReference<DataMapperService> reference) {
+			DataMapperService service = context.getService(reference);
+			controller.setDataMapperService(service);
+			service.getServiceDataType();
+			return service;
+		}
+
+		@Override
+		public void modifiedService(ServiceReference<DataMapperService> reference, DataMapperService service) {
+			controller.setDataMapperService(service);
+		}
+
+		@Override
+		public void removedService(ServiceReference<DataMapperService> reference, DataMapperService service) {
+			controller.setDataMapperService(null);
+		};
+
+	};
+
 	public void start(BundleContext bundleContext) throws Exception {
 		try {
 			Activator.context = bundleContext;
 			LOGGER.info("Starting TTN IPE");
 
-			bundleContext.registerService(InterworkingService.class.getName(), new Controller(), null);
-			
+			controller = new Controller();
+			bundleContext.registerService(InterworkingService.class, controller, null);
+			// Create a filter to retrieve on DataMapperService of JSON
+			Filter filter = FrameworkUtil.createFilter("(&(" + Constants.OBJECTCLASS + "="
+					+ DataMapperService.class.getName() + ")" + "(type=" + MimeMediaType.JSON + "))");
+			dataMapperServiceTracker = new ServiceTracker<>(bundleContext, filter, dataMapperServiceCustomizer);
+			dataMapperServiceTracker.open();
+
 			monitor = new Monitor();
 			cseServiceTracker = new ServiceTracker<>(bundleContext, CseService.class, cseServiceTrackerCustomizer);
 			cseServiceTracker.open();
-			
+
 		} catch (Exception e) {
 			LOGGER.error(e.getMessage(), e);
 		}
@@ -64,6 +98,8 @@ public class Activator implements BundleActivator {
 		Activator.context = null;
 		cseServiceTracker.close();
 		cseServiceTracker = null;
+		dataMapperServiceTracker.close();
+		dataMapperServiceTracker = null;
 		monitor.stop();
 	}
 

@@ -8,6 +8,7 @@ Bundle-RequiredExecutionEnvironment: JavaSE-1.7
 Automatic-Module-Name: org.eclipse.om2m.ttn.ipe
 Import-Package: org.apache.commons.logging,
  org.eclipse.om2m.core.service,
+ org.eclipse.om2m.datamapping.service,
  org.eclipse.om2m.interworking.service,
  org.osgi.framework,
  org.osgi.util.tracker
